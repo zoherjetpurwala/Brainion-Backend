@@ -26,6 +26,8 @@ app.use(
 // Parse incoming JSON payloads
 app.use(express.json());
 
+app.set('trust proxy', 1);
+
 // Configure session
 app.use(sessionConfig);
 
