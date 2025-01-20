@@ -7,7 +7,7 @@ const sessionConfig = session({
   cookie: {
     secure: process.env.NODE_ENV === "production" && process.env.USE_HTTPS === "true",
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
   },
 });
 
