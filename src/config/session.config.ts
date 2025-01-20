@@ -7,7 +7,7 @@ const sessionConfig = session({
   cookie: {
     secure: "auto",
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "none",
   },
 });
 
