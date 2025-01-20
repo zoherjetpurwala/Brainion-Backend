@@ -28,10 +28,25 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/user", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json(req.user);
-  } else {
-    res.status(401).send("Unauthorized");
+  try {
+    if (req.isAuthenticated()) {
+      res.status(200).json({
+        success: true,
+        message: "User authenticated",
+        user: req.user,
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized - User not authenticated",
+      });
+    }
+  } catch (error) {
+    console.error("Error in /user endpoint:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching user information",
+    });
   }
 });
 
