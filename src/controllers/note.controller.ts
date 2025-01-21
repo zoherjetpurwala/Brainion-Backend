@@ -48,12 +48,14 @@ export const getNotes = async (req: Request, res: Response) => {
         return res.status(400).json({ error: "User ID is required" });
 
       const notes = await prisma.content.findMany({
-        where: { userId: userId, type: "NOTE" },
+        where: { userId: userId },
         orderBy: { createdAt: "desc" },
         select: {
           id: true,
+          type: true,
           title: true,
           content: true,
+          url: true,
           createdAt: true,
         },
       });

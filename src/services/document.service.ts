@@ -5,12 +5,10 @@ export const processDocument = async (file: Express.Multer.File) => {
   try {
     const pdfParser = new PDFParser();
 
-    // Convert buffer to text using a Promise wrapper
     const extractTextFromPDF = async (buffer: Buffer): Promise<string> => {
       return new Promise((resolve, reject) => {
         pdfParser.on("pdfParser_dataReady", (pdfData) => {
           try {
-            // Decode the text content
             const text = decodeURIComponent(pdfData.Pages.flatMap(page => 
               page.Texts.map(text => text.R.map(r => r.T).join(' '))
             ).join(' '));
@@ -39,7 +37,7 @@ export const processDocument = async (file: Express.Multer.File) => {
     const embedding = await generateEmbedding(text);
 
     // Trim content if it's too long for your database
-    const maxContentLength = 10000; // Adjust based on your database limits
+    const maxContentLength = 20000; // Adjust based on your database limits
     const trimmedContent = text.length > maxContentLength 
       ? text.slice(0, maxContentLength) + '...'
       : text;

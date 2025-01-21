@@ -23,15 +23,16 @@ export const uploadDocument = async (req: Request, res: Response) => {
     const tebiFileUrl = await uploadToTebiStorage(file);
 
     // Process document
-    const { content, embedding } = await processDocument(file);
+    const { content, embedding, metadata } = await processDocument(file);
     console.log(content);
     
 
     const document = await prisma.$executeRaw`
-      INSERT INTO "Content" (id, "url", content, embedding, "userId", "createdAt", "updatedAt")
+      INSERT INTO "Content" (id, "url", title, content, embedding, "userId", "createdAt", "updatedAt")
       VALUES (
         gen_random_uuid(),
         ${tebiFileUrl},
+        ${metadata.fileName}
         ${content},
         ${embedding}::vector,
         ${userId},
@@ -51,7 +52,6 @@ export const uploadDocument = async (req: Request, res: Response) => {
   }
 };
 
-// Fetch all documents for a user
 export const getDocuments = async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;
@@ -60,7 +60,7 @@ export const getDocuments = async (req: Request, res: Response) => {
 
     const content = await prisma.content.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" }, // Optional: Order by latest uploaded
+      orderBy: { createdAt: "desc" },
     });
 
     res.status(200).json(content);
@@ -70,7 +70,6 @@ export const getDocuments = async (req: Request, res: Response) => {
   }
 };
 
-// Answer a question using Gemini AI and documents
 export const askQuestion = async (req: Request, res: Response) => {
   try {
     const { query, userId } = req.body;
@@ -78,10 +77,8 @@ export const askQuestion = async (req: Request, res: Response) => {
     if (!query) return res.status(400).json({ error: "Question is required" });
     if (!userId) return res.status(400).json({ error: "User ID is required" });
 
-    // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
 
-    // Find the most relevant documents based on embedding similarity
     const results: any = await prisma.$queryRaw`
       SELECT id, content, (embedding <-> ${queryEmbedding}::vector) AS distance
       FROM "Document"
@@ -96,7 +93,6 @@ export const askQuestion = async (req: Request, res: Response) => {
 
     const relevantContent = results[0].content;
 
-    // Generate answer using Gemini AI
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `
       Context: ${relevantContent}
