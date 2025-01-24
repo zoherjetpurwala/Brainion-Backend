@@ -11,10 +11,9 @@ export const createNote = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Note content is required" });
     if (!title)
       return res.status(400).json({ error: "Note title is required" });
-
-    // Generate embedding
-    const embedding = await generateEmbedding(content);
-    const contentType = "NOTE"; // Create note in the database
+    const createdAt = new Date()
+    const embedding = await generateEmbedding(createdAt + "\n" + content);
+    const contentType = "NOTE";
     const note = await prisma.$executeRaw`
     INSERT INTO "Content" (id, title, content, tags, embedding, "userId", "type", "createdAt", "updatedAt")
     VALUES (
@@ -40,7 +39,7 @@ export const createNote = async (req: Request, res: Response) => {
 export const getNotes = async (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     try {
-      const userId = req.query.userId as string; // Extract userId from query parameters
+      const userId = req.query.userId as string;
 
       console.log(userId);
 
@@ -80,7 +79,7 @@ export const deleteNote = async (req: Request, res: Response) => {
       where: { id },
     });
 
-    res.status(204).send(); // Success, no content
+    res.status(204).send();
   } catch (error) {
     console.error("Error deleting note:", error);
     res.status(500).json({ error: "Failed to delete note" });
@@ -91,7 +90,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 export const askQuestion = async (req: Request, res: Response) => {
   try {
-    const { contentType, query, userId, similarityThreshold = 0.3 } = req.body;  // default threshold to 0.7
+    const { contentType, query, userId, similarityThreshold = 0.3 } = req.body;
 
     if (!query) return res.status(400).json({ error: "Question is required" });
     if (!userId) return res.status(400).json({ error: "User ID is required" });
