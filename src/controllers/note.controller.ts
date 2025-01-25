@@ -98,13 +98,13 @@ export const askQuestion = async (req: Request, res: Response) => {
     const queryEmbedding = await generateEmbedding(query);
 
     const results: any = await prisma.$queryRaw`
-    SELECT title, content, 1 - (embedding <=> ${queryEmbedding}::vector) AS cosine_similarity
-    FROM "Content"
-    WHERE "userId" = ${userId}
-    AND "type" = ${contentType.toUpperCase()}::"ContentType"
-    AND 1 - (embedding <=> ${queryEmbedding}::vector) > ${similarityThreshold}
-    ORDER BY cosine_similarity DESC
-    LIMIT 3;
+      SELECT title, content, "createdAt" , 1 - (embedding <=> ${queryEmbedding}::vector) AS cosine_similarity
+      FROM "Content"
+      WHERE "userId" = ${userId}
+      AND "type" = ${contentType.toUpperCase()}::"ContentType"
+      AND 1 - (embedding <=> ${queryEmbedding}::vector) > ${similarityThreshold}
+      ORDER BY cosine_similarity DESC
+      LIMIT 3;
   `;
 
     if (results.length === 0) {
