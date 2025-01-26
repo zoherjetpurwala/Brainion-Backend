@@ -24,18 +24,19 @@ export const uploadDocument = async (req: Request, res: Response) => {
 
     // Process document
     const { content, embedding, metadata } = await processDocument(file);
-    console.log(content);
+    const contentType = "DOCUMENT";
     
 
     const document = await prisma.$executeRaw`
-      INSERT INTO "Content" (id, "url", title, content, embedding, "userId", "createdAt", "updatedAt")
+      INSERT INTO "Content" (id, url, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
       VALUES (
         gen_random_uuid(),
         ${tebiFileUrl},
-        ${metadata.fileName}
+        ${metadata.fileName},
         ${content},
         ${embedding}::vector,
         ${userId},
+        ${contentType}::"ContentType", -- Add the contentType here
         NOW(),
         NOW()
       )

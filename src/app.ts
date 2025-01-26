@@ -47,7 +47,7 @@ app.use("/api/v1/content", noteRoutes);
 
 // app.use("/tweets", tweetRoutes);
 // app.use("/videos", videoRoutes);
- app.use("/documents", documentRoutes);
+ app.use("/api/v1/documents", documentRoutes);
 
 // Basic endpoint to confirm server is running
 app.get("/", (_, response: Response) => {

@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const createNote = async (req: Request, res: Response) => {
   try {
-    const { title, content, tags, userId } = req.body;
+    const { title, content, userId } = req.body;
 
     if (!content)
       return res.status(400).json({ error: "Note content is required" });
@@ -15,12 +15,11 @@ export const createNote = async (req: Request, res: Response) => {
     const embedding = await generateEmbedding(createdAt + "\n" + content);
     const contentType = "NOTE";
     const note = await prisma.$executeRaw`
-    INSERT INTO "Content" (id, title, content, tags, embedding, "userId", "type", "createdAt", "updatedAt")
+    INSERT INTO "Content" (id, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
     VALUES (
       gen_random_uuid(),
       ${title}, 
       ${content}, 
-      ARRAY[${tags}]::text[], 
       ${embedding}::vector, 
       ${userId}, 
       ${contentType}::"ContentType", -- Add the contentType here
@@ -98,13 +97,12 @@ export const askQuestion = async (req: Request, res: Response) => {
     const queryEmbedding = await generateEmbedding(query);
 
     const results: any = await prisma.$queryRaw`
-      SELECT title, content, "createdAt" , 1 - (embedding <=> ${queryEmbedding}::vector) AS cosine_similarity
-      FROM "Content"
-      WHERE "userId" = ${userId}
-      AND "type" = ${contentType.toUpperCase()}::"ContentType"
-      AND 1 - (embedding <=> ${queryEmbedding}::vector) > ${similarityThreshold}
-      ORDER BY cosine_similarity DESC
-      LIMIT 3;
+    SELECT title, content, "createdAt", 1 - (embedding <=> ${queryEmbedding}::vector) AS cosine_similarity
+    FROM "Content"
+    WHERE "userId" = ${userId}
+    AND 1 - (embedding <=> ${queryEmbedding}::vector) > ${similarityThreshold}
+    ORDER BY cosine_similarity DESC
+    LIMIT 3;
   `;
 
     if (results.length === 0) {
