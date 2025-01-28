@@ -7,9 +7,8 @@ import sessionConfig from "./config/session.config.js";
 import passport from "./config/passport.config.js";
 import authRoutes from "./route/auth.route.js";
 import noteRoutes from "./route/note.route.js";
-// import tweetRoutes from "./route/tweet.route.js";
-// import videoRoutes from "./route/video.route.js";
 import documentRoutes from "./route/document.route.js";
+import searchRoute from "./route/search.route.js"
 import prisma from "./prisma.js";
 
 // Initialize Express app
@@ -26,7 +25,7 @@ app.use(
 // Parse incoming JSON payloads
 app.use(express.json());
 
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Configure session
 app.use(sessionConfig);
@@ -43,11 +42,8 @@ app.use(errorHandler);
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/notes", noteRoutes);
-app.use("/api/v1/content", noteRoutes);
-
-// app.use("/tweets", tweetRoutes);
-// app.use("/videos", videoRoutes);
- app.use("/api/v1/documents", documentRoutes);
+app.use("/api/v1/documents", documentRoutes);
+app.use("/api/v1/search", searchRoute)
 
 // Basic endpoint to confirm server is running
 app.get("/", (_, response: Response) => {
@@ -59,13 +55,12 @@ app.get("/", (_, response: Response) => {
 // Start the server
 app.listen(process.env.PORT, async () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
-  
+
   try {
     await prisma.$connect();
     console.log("Database Connected");
   } catch (error: any) {
     console.log("Database Error: " + error.message);
-    
   }
 });
 

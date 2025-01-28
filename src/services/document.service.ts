@@ -28,15 +28,10 @@ export const processDocument = async (file: Express.Multer.File) => {
       });
     };
 
-    // Extract text content
-    const text = await extractTextFromPDF(file.buffer);
-    console.log(text);
-    
+    const text = await extractTextFromPDF(file.buffer);    
 
-    // Generate embedding for the text content
     const embedding = await generateEmbedding(text);
 
-    // Trim content if it's too long for your database
     const maxContentLength = 20000; // Adjust based on your database limits
     const trimmedContent = text.length > maxContentLength 
       ? text.slice(0, maxContentLength) + '...'
@@ -59,7 +54,6 @@ export const processDocument = async (file: Express.Multer.File) => {
   }
 };
 
-// Helper function to validate PDF file
 export const validatePDF = (file: Express.Multer.File): boolean => {
   const validPDFTypes = [
     'application/pdf',
