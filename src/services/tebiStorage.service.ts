@@ -1,7 +1,5 @@
-// tebiStorage.service.ts
 import { S3 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-
 
 const s3 = new S3({
   endpoint: process.env.TEBI_ENDPOINT as string,
@@ -14,7 +12,10 @@ const s3 = new S3({
 });
 
 export const uploadToTebiStorage = async (file: Express.Multer.File) => {
-  const fileKey = `documents/${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+  const fileKey = `documents/${Date.now()}-${file.originalname.replace(
+    /[^a-zA-Z0-9.-]/g,
+    "_"
+  )}`;
 
   const upload = new Upload({
     client: s3,
@@ -24,6 +25,7 @@ export const uploadToTebiStorage = async (file: Express.Multer.File) => {
       Body: file.buffer,
       ContentType: file.mimetype,
       ContentLength: file.size,
+      ACL: "public-read",
     },
   });
 
