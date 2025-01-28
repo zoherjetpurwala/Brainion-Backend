@@ -6,6 +6,7 @@ import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import sessionConfig from "./config/session.config.js";
 import passport from "./config/passport.config.js";
 import authRoutes from "./route/auth.route.js";
+import contentRoute from "./route/content.route.js";
 import noteRoutes from "./route/note.route.js";
 import documentRoutes from "./route/document.route.js";
 import searchRoute from "./route/search.route.js"
@@ -41,6 +42,7 @@ app.use(errorHandler);
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/content", contentRoute);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/documents", documentRoutes);
 app.use("/api/v1/search", searchRoute)

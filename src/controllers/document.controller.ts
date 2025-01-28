@@ -21,7 +21,6 @@ export const uploadDocument = async (req: Request, res: Response) => {
     // Process document
     const { content, embedding, metadata } = await processDocument(file);
     const contentType = "DOCUMENT";
-    
 
     const document = await prisma.$executeRaw`
       INSERT INTO "Content" (id, url, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
@@ -42,27 +41,9 @@ export const uploadDocument = async (req: Request, res: Response) => {
     res.status(201).json(document);
   } catch (error) {
     console.error("Error uploading document:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Failed to upload document",
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : "Unknown error",
     });
-  }
-};
-
-export const getDocuments = async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.body;
-
-    if (!userId) return res.status(400).json({ error: "User ID is required" });
-
-    const content = await prisma.content.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
-
-    res.status(200).json(content);
-  } catch (error) {
-    console.error("Error fetching documents:", error);
-    res.status(500).json({ error: "Failed to fetch documents" });
   }
 };
