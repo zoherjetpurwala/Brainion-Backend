@@ -10,8 +10,17 @@ export const createNote = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Note content is required" });
     if (!title)
       return res.status(400).json({ error: "Note title is required" });
-    const createdAt = new Date()
-    const embedding = await generateEmbedding(createdAt + "\n" + content);
+    const createdAt = new Date();
+    const embedding = await generateEmbedding(
+      "title: " +
+        title +
+        "\n" +
+        "Date: " +
+        createdAt +
+        "\n" +
+        "Content: " +
+        content
+    );
     const contentType = "NOTE";
     const note = await prisma.$executeRaw`
     INSERT INTO "Content" (id, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
@@ -34,7 +43,6 @@ export const createNote = async (req: Request, res: Response) => {
   }
 };
 
-
 export const deleteNote = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -51,4 +59,3 @@ export const deleteNote = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete note" });
   }
 };
-
