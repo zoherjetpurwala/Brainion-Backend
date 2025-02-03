@@ -1,8 +1,10 @@
 import express from "express"
-import { searchFunction } from "../controllers/search.controller.js";
+import { searchByTitle, searchWithAI } from "../controllers/search.controller.js";
 
 const router = express.Router();
 
-router.post("/", searchFunction)
+router.post("/ai", searchWithAI)
+router.post("/title", searchByTitle)
+
 
 export default router;
