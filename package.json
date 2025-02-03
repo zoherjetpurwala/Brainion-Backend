@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node dist/app.js",
-    "build": "prisma generate && tsc",
+    "build": "tsc",
+    "postinstall": "prisma generate",
     "dev": "nodemon"
   },
   "keywords": [],
