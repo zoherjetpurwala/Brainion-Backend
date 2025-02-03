@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport.config.js";
+import prisma from "../prisma.js";
 
 const router = Router();
 
@@ -47,6 +48,29 @@ router.get("/user", (req, res) => {
       success: false,
       message: "An error occurred while fetching user information",
     });
+  }
+});
+
+router.get("/demo", async (req, res) => {
+  try {
+    const demoUser = await prisma.user.findUnique({
+      where: { email: "demo@gmail.com" },
+    });
+
+    if (!demoUser) {
+      return res.status(404).json({ message: "Demo account not found" });
+    }
+
+    req.login(demoUser, (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Error logging in demo user", error: err });
+      }
+      res.redirect(process.env.CLIENT_URL + "/dashboard");
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error logging in demo user", error });
   }
 });
 
