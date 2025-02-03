@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc",
-    "postinstall": "prisma generate",
+    "postinstall": "npx prisma generate",
     "dev": "nodemon"
   },
   "keywords": [],
