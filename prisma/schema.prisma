@@ -20,6 +20,12 @@ model User {
   contents  Content[] // Replaces documents, notes, tweets, videos
 }
 
+model Quote {
+  id        String    @id @default(cuid())
+  quote     String
+  date      DateTime  @default(now())
+}
+
 model Content {
   id        String   @id @default(cuid())
   userId    String

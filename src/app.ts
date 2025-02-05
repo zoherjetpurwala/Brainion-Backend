@@ -1,4 +1,4 @@
-import express, { Response } from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import { rateLimiter } from "./middleware/rateLimiter.middleware.js";
 import { securityMiddleware } from "./middleware/security.middleware.js";
@@ -9,8 +9,9 @@ import authRoutes from "./route/auth.route.js";
 import contentRoute from "./route/content.route.js";
 import noteRoutes from "./route/note.route.js";
 import documentRoutes from "./route/document.route.js";
-import searchRoute from "./route/search.route.js"
+import searchRoute from "./route/search.route.js";
 import prisma from "./prisma.js";
+import "./cronjob/quoteCron.js"
 
 // Initialize Express app
 const app = express();
@@ -45,7 +46,18 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/content", contentRoute);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/documents", documentRoutes);
-app.use("/api/v1/search", searchRoute)
+app.use("/api/v1/search", searchRoute);
+
+app.get("/daily-quote", async (request: Request, response: Response) => {
+  try {
+    const quoteData = await prisma.quote.findFirst();
+    if (!quoteData)
+      return response.status(403).json({ message: "No quote found" });
+    response.json({ quote: quoteData.quote });
+  } catch (error) {
+    response.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // Basic endpoint to confirm server is running
 app.get("/", (_, response: Response) => {
