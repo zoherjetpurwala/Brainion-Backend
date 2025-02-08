@@ -10,8 +10,9 @@ import contentRoute from "./route/content.route.js";
 import noteRoutes from "./route/note.route.js";
 import documentRoutes from "./route/document.route.js";
 import searchRoute from "./route/search.route.js";
+import linkRoute from "./route/link.route.js";
 import prisma from "./prisma.js";
-import "./cronjob/quoteCron.js"
+import "./cronjob/quoteCron.js";
 
 // Initialize Express app
 const app = express();
@@ -47,6 +48,7 @@ app.use("/api/v1/content", contentRoute);
 app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/documents", documentRoutes);
 app.use("/api/v1/search", searchRoute);
+app.use("/api/v1/link", linkRoute);
 
 app.get("/daily-quote", async (request: Request, response: Response) => {
   try {
