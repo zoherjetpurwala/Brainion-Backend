@@ -1,7 +1,14 @@
 import { Request, Response } from "express";
 import puppeteer from "puppeteer";
+import axios from "axios";
 import { generateEmbedding } from "../services/embedding.service.js";
 import prisma from "../prisma.js";
+
+type YouTubeApiResponse = {
+  items: { snippet: { title: string; description: string; thumbnails: { high?: { url: string } } } }[];
+};
+
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 const fetchTwitterMetadata = async (url: string) => {
   const browser = await puppeteer.launch({ headless: true });
@@ -12,8 +19,7 @@ const fetchTwitterMetadata = async (url: string) => {
   );
 
   await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
-
-  await page.waitForSelector("body"); // Ensure body is available
+  await page.waitForSelector("body");
 
   const metadata = await page.evaluate(() => {
     const tweetText =
@@ -36,6 +42,32 @@ const fetchTwitterMetadata = async (url: string) => {
   return metadata;
 };
 
+const fetchYouTubeMetadata = async (url: string) => {
+  try {
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)?.[1];
+    if (!videoId) throw new Error("Invalid YouTube URL");
+
+    console.log(videoId);
+    
+
+    const response = await axios.get<YouTubeApiResponse>(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet`
+    );
+
+    const video = response.data.items[0]?.snippet;
+    if (!video) throw new Error("YouTube metadata not found");
+
+    return {
+      title: video.title,
+      content: video.description,
+      thumbnail: video.thumbnails.high?.url || null,
+    };
+  } catch (error) {
+    console.error("Error fetching YouTube metadata:", error);
+    return null;
+  }
+};
+
 const fetchWebsiteMetadata = async (url: string) => {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
@@ -45,23 +77,15 @@ const fetchWebsiteMetadata = async (url: string) => {
   );
 
   await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+  await page.waitForSelector("body");
 
-  await page.waitForSelector("body"); // Ensure body is available
   const metadata = await page.evaluate(() => {
     const title = document.title || "No title available";
     const bodyText = document.body.innerText?.trim() || "";
 
-    // Get Open Graph image
-    const ogImage = document
-      .querySelector("meta[property='og:image']")
-      ?.getAttribute("content");
-
-    // Get favicon
-    const favicon =
-      document.querySelector("link[rel='icon']")?.getAttribute("href") ||
+    const ogImage = document.querySelector("meta[property='og:image']")?.getAttribute("content");
+    const favicon = document.querySelector("link[rel='icon']")?.getAttribute("href") ||
       document.querySelector("link[rel='shortcut icon']")?.getAttribute("href");
-
-    // Get the first image in the document if no OG image is found
     const firstImg = document.querySelector("img")?.getAttribute("src");
 
     const absoluteUrl = (imgUrl?: string | null): string | null => {
@@ -83,18 +107,18 @@ const fetchWebsiteMetadata = async (url: string) => {
   });
 
   await browser.close();
-  console.log(metadata);
-  
   return metadata;
 };
 
 export const createLink = async (request: Request, response: Response) => {
   try {
     const { url, userId } = request.body;
-
     let metadata;
+
     if (url.includes("twitter.com") || url.includes("x.com")) {
       metadata = await fetchTwitterMetadata(url);
+    } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      metadata = await fetchYouTubeMetadata(url);
     } else {
       metadata = await fetchWebsiteMetadata(url);
     }
@@ -115,9 +139,7 @@ export const createLink = async (request: Request, response: Response) => {
     );
 
     const contentType = "LINK";
-     const metadataJson = {
-      thumbnail: metadata.thumbnail,
-    };
+    const metadataJson = { thumbnail: metadata.thumbnail };
     const note = await prisma.$executeRaw`
       INSERT INTO "Content" (id, url, metadata, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
       VALUES (
@@ -128,7 +150,7 @@ export const createLink = async (request: Request, response: Response) => {
         ${metadata.content},
         ${embedding}::vector,
         ${userId},
-        ${contentType}::"ContentType", -- Add the contentType here
+        ${contentType}::"ContentType",
         NOW(),
         NOW()
       )
