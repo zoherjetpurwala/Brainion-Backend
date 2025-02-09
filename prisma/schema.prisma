@@ -43,7 +43,6 @@ model Content {
 
 enum ContentType {
   NOTE
-  TWEET
-  VIDEO
   DOCUMENT
+  LINK
 }

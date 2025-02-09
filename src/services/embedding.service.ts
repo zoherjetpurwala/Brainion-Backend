@@ -16,7 +16,7 @@ const truncateText = (text: string, maxBytes: number): string => {
 
 export const generateEmbedding = async (text: string): Promise<number[]> => {
   try {
-    const truncatedText = truncateText(text, 9_900);
+    const truncatedText = truncateText(text, 9_000);
 
     const result = await model.embedContent(truncatedText);
     return result.embedding.values;

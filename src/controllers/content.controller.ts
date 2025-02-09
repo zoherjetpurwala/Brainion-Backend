@@ -18,6 +18,7 @@ export const getAllContent = async (req: Request, res: Response) => {
             title: true,
             content: true,
             url: true,
+            metadata: true,
             createdAt: true,
           },
         });
