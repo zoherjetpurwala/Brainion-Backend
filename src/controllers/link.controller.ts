@@ -18,17 +18,13 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 const fetchTwitterMetadata = async (url: string) => {
   const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: "/opt/render/.cache/puppeteer/chrome/linux-133.0.6943.53/chrome-linux64/chrome",
+    headless: false,
+    ignoreDefaultArgs: ["--disable-extensions"],
     args: [
       "--no-sandbox",
+      "--use-gl=egl",
       "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--no-first-run",
-      "--single-process",
-      "--disable-accelerated-2d-canvas"
-    ]
+    ],
   });
   const page = await browser.newPage();
 
@@ -87,17 +83,13 @@ const fetchYouTubeMetadata = async (url: string) => {
 
 const fetchWebsiteMetadata = async (url: string) => {
   const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: "/opt/render/.cache/puppeteer/chrome/linux-133.0.6943.53/chrome-linux64/chrome",
+    headless: false,
+    ignoreDefaultArgs: ["--disable-extensions"],
     args: [
       "--no-sandbox",
+      "--use-gl=egl",
       "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--no-first-run",
-      "--single-process",
-      "--disable-accelerated-2d-canvas"
-    ]
+    ],
   });
 
   const page = await browser.newPage();
