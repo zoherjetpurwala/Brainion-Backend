@@ -45,10 +45,7 @@ const fetchTwitterMetadata = async (url: string) => {
 const fetchYouTubeMetadata = async (url: string) => {
   try {
     const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)?.[1];
-    if (!videoId) throw new Error("Invalid YouTube URL");
-
-    console.log(videoId);
-    
+    if (!videoId) throw new Error("Invalid YouTube URL");    
 
     const response = await axios.get<YouTubeApiResponse>(
       `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet`
@@ -117,7 +114,7 @@ export const createLink = async (request: Request, response: Response) => {
 
     if (url.includes("twitter.com") || url.includes("x.com")) {
       metadata = await fetchTwitterMetadata(url);
-    } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    } else if (url.includes("https://www.youtube.com/watch") || url.includes("youtu.be")) {
       metadata = await fetchYouTubeMetadata(url);
     } else {
       metadata = await fetchWebsiteMetadata(url);
