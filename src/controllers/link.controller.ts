@@ -5,27 +5,13 @@ import { generateEmbedding } from "../services/embedding.service.js";
 import prisma from "../prisma.js";
 
 type YouTubeApiResponse = {
-  items: {
-    snippet: {
-      title: string;
-      description: string;
-      thumbnails: { high?: { url: string } };
-    };
-  }[];
+  items: { snippet: { title: string; description: string; thumbnails: { high?: { url: string } } } }[];
 };
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 const fetchTwitterMetadata = async (url: string) => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    ignoreDefaultArgs: ["--disable-extensions"],
-    args: [
-      "--no-sandbox",
-      "--use-gl=egl",
-      "--disable-setuid-sandbox",
-    ],
-  });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   await page.setUserAgent(
@@ -58,10 +44,8 @@ const fetchTwitterMetadata = async (url: string) => {
 
 const fetchYouTubeMetadata = async (url: string) => {
   try {
-    const videoId = url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/
-    )?.[1];
-    if (!videoId) throw new Error("Invalid YouTube URL");
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)?.[1];
+    if (!videoId) throw new Error("Invalid YouTube URL");    
 
     const response = await axios.get<YouTubeApiResponse>(
       `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet`
@@ -82,16 +66,7 @@ const fetchYouTubeMetadata = async (url: string) => {
 };
 
 const fetchWebsiteMetadata = async (url: string) => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    ignoreDefaultArgs: ["--disable-extensions"],
-    args: [
-      "--no-sandbox",
-      "--use-gl=egl",
-      "--disable-setuid-sandbox",
-    ],
-  });
-
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   await page.setUserAgent(
@@ -105,11 +80,8 @@ const fetchWebsiteMetadata = async (url: string) => {
     const title = document.title || "No title available";
     const bodyText = document.body.innerText?.trim() || "";
 
-    const ogImage = document
-      .querySelector("meta[property='og:image']")
-      ?.getAttribute("content");
-    const favicon =
-      document.querySelector("link[rel='icon']")?.getAttribute("href") ||
+    const ogImage = document.querySelector("meta[property='og:image']")?.getAttribute("content");
+    const favicon = document.querySelector("link[rel='icon']")?.getAttribute("href") ||
       document.querySelector("link[rel='shortcut icon']")?.getAttribute("href");
     const firstImg = document.querySelector("img")?.getAttribute("src");
 
@@ -142,10 +114,7 @@ export const createLink = async (request: Request, response: Response) => {
 
     if (url.includes("twitter.com") || url.includes("x.com")) {
       metadata = await fetchTwitterMetadata(url);
-    } else if (
-      url.includes("https://www.youtube.com/watch") ||
-      url.includes("youtu.be")
-    ) {
+    } else if (url.includes("https://www.youtube.com/watch") || url.includes("youtu.be")) {
       metadata = await fetchYouTubeMetadata(url);
     } else {
       metadata = await fetchWebsiteMetadata(url);

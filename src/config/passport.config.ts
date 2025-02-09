@@ -1,6 +1,8 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import prisma from "../prisma.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
