@@ -19,8 +19,7 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const fetchTwitterMetadata = async (url: string) => {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome-stable",
+    executablePath: "/opt/render/.cache/puppeteer/chrome/linux-133.0.6943.53/chrome-linux64/chrome",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -28,8 +27,8 @@ const fetchTwitterMetadata = async (url: string) => {
       "--disable-gpu",
       "--no-first-run",
       "--single-process",
-      "--disable-accelerated-2d-canvas",
-    ],
+      "--disable-accelerated-2d-canvas"
+    ]
   });
   const page = await browser.newPage();
 
@@ -89,8 +88,7 @@ const fetchYouTubeMetadata = async (url: string) => {
 const fetchWebsiteMetadata = async (url: string) => {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome-stable",
+    executablePath: "/opt/render/.cache/puppeteer/chrome/linux-133.0.6943.53/chrome-linux64/chrome",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -98,8 +96,8 @@ const fetchWebsiteMetadata = async (url: string) => {
       "--disable-gpu",
       "--no-first-run",
       "--single-process",
-      "--disable-accelerated-2d-canvas",
-    ],
+      "--disable-accelerated-2d-canvas"
+    ]
   });
 
   const page = await browser.newPage();
