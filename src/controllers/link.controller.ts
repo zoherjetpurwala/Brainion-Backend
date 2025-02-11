@@ -66,7 +66,7 @@ const fetchYouTubeMetadata = async (url: string) => {
 };
 
 const fetchWebsiteMetadata = async (url: string) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: true, args:["--ignore-certificate-errors"] });
   const page = await browser.newPage();
 
   await page.setUserAgent(
