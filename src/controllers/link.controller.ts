@@ -137,24 +137,44 @@ export const createLink = async (request: Request, response: Response) => {
 
     const contentType = "LINK";
     const metadataJson = { thumbnail: metadata.thumbnail };
-    const note = await prisma.$executeRaw`
-      INSERT INTO "Content" (id, url, metadata, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
-      VALUES (
-        gen_random_uuid(),
-        ${url},
-        ${JSON.stringify(metadataJson)}::jsonb,
-        ${metadata.title},
-        ${metadata.content},
-        ${embedding}::vector,
-        ${userId},
-        ${contentType}::"ContentType",
-        NOW(),
-        NOW()
+    
+    const note = await prisma.$queryRaw`
+      WITH inserted AS (
+        INSERT INTO "Content" (id, url, metadata, title, content, embedding, "userId", "type", "createdAt", "updatedAt")
+        VALUES (
+          gen_random_uuid(),
+          ${url},
+          ${JSON.stringify(metadataJson)}::jsonb,
+          ${metadata.title},
+          ${metadata.content},
+          ${embedding}::vector,
+          ${userId},
+          ${contentType}::"ContentType",
+          NOW(),
+          NOW()
+        )
+        RETURNING *
       )
-      RETURNING *;
+      SELECT 
+        id,
+        url,
+        title,
+        content,
+        metadata,
+        "userId",
+        type,
+        "createdAt",
+        "updatedAt"
+      FROM inserted;
     `;
 
-    response.status(201).json(note);
+    const insertedLink = Array.isArray(note) ? note[0] : note;
+
+    response.status(201).json({
+      success: true,
+      data: insertedLink,
+      message: "Link created successfully"
+    });
   } catch (error: any) {
     console.error("Error creating link:", error);
     response.status(500).json({ error: "Failed to create link" });
