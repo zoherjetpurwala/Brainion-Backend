@@ -18,20 +18,9 @@ import "./cronjob/quoteCron.js";
 const app = express();
 
 // CORS Configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "https://brainion.vercel.app",
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
